@@ -16,9 +16,9 @@
 
 */
 using System;
-using System.IO;
 using UnityEngine;
 
+using KSPe.Util;
 using DATA = KSPe.IO.Data<ShowFPS.Startup>;
 
 namespace ShowFPS
@@ -29,8 +29,8 @@ namespace ShowFPS
 
 		internal static bool startVisible;
 
-        internal static float position_x;
-        internal static float position_y;
+		private static readonly DictionaryValueList<GameScenes, Vector2> FpsWidgetPositions = new DictionaryValueList<GameScenes, Vector2>();
+		internal static Vector2 FpsWidgetPosition => FpsWidgetPositions[HighLogic.LoadedScene];
 
         internal static int fontSize = 10;
 
@@ -52,7 +52,7 @@ namespace ShowFPS
         internal static float frequency = 0.5f;
         internal static float alpha = 1f;
 
-		public static void LoadConfig()
+        public static void LoadConfig()
         {
 			bool newSettings = false;
 
@@ -65,9 +65,18 @@ namespace ShowFPS
 
             startVisible = settings.GetValue<bool>("startVisible", false);
 
-            // These values are based on screen size
-            position_x = settings.GetValue<float>("position_x", 50);
-            position_y = settings.GetValue<float>("position_y", 50);
+			// These values are based on screen size
+			FpsWidgetPositions.Clear();
+			if (settings.HasNode("fpswidget_positions"))
+			{
+				KSPe.ConfigNodeWithSteroids cns = KSPe.ConfigNodeWithSteroids.from(settings.GetNode("fpswidget_positions"));
+				foreach (GameScenes gs in Enum.GetValues(typeof(GameScenes)))
+					FpsWidgetPositions[gs] = cns.GetValue<Vector2>(gs.ToString(), new Vector2(50, 50));
+			}
+			else
+				foreach (GameScenes gs in Enum.GetValues(typeof(GameScenes)))
+					FpsWidgetPositions[gs] = new Vector2(50, 50);
+
             fontSize = settings.GetValue<int>("fontSize", 10);
 			keyToggleWindow = GetKeyCode(settings, "keyToggleWindow", KeyCode.KeypadMultiply);
 			keyScaleUp = GetKeyCode(settings, "keyScaleUp", KeyCode.KeypadPlus);
@@ -87,6 +96,8 @@ namespace ShowFPS
             if (newSettings) SaveConfig();
         }
 
+		internal static void UpdateFpsWidgetPosition(float x, float y) => FpsWidgetPositions[HighLogic.LoadedScene] = new Vector2(x, y);
+
 		private static KeyCode GetKeyCode(KSPe.ConfigNodeWithSteroids cn, string name, KeyCode defaultValue)
 		{
 			string stringValue = "";
@@ -101,8 +112,12 @@ namespace ShowFPS
 
             settings.SetValue("startVisible", startVisible, false);
 
-            settings.SetValue("position_x", position_x, true);
-            settings.SetValue("position_y", position_y, true);
+			{
+				ConfigNode cn = settings.HasNode("fpswidget_positions") ? settings.GetNode("fpswidget_positions") : settings.AddNode("fpswidget_positions");
+				foreach (GameScenes gs in FpsWidgetPositions.Keys)
+					cn.SetValue(gs.ToString(), FpsWidgetPositions[gs], true);
+			}
+
             settings.SetValue("fontSize", fontSize, true);
 
             settings.SetValue("keyToggleWindow", keyToggleWindow.ToString(), true);

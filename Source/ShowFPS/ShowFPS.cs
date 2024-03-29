@@ -82,8 +82,7 @@ namespace ShowFPS
             Log.dbg("[ShowFPS: OnMouseUp");
             drag = false;
 
-            Settings.position_x = x;
-            Settings.position_y = y;
+            Settings.UpdateFpsWidgetPosition(x, y);
             Settings.SaveConfig();
         }
 
@@ -96,7 +95,8 @@ namespace ShowFPS
 #if DEBUG
             if (cnt++ == 100)
             {
-                Log.dbg("[ShowFPS]: x, y: {0}, {1}", Settings.position_x, Settings.position_y);
+                Vector2 fpsPos = Settings.FpsWidgetPosition;
+                Log.dbg("[ShowFPS]: x, y: {0}, {1}", fpsPos.x, fpsPos.y);
                 cnt = 0;
             }
 #endif
@@ -109,8 +109,9 @@ namespace ShowFPS
             }
             else
             {
-                x = Settings.position_x;
-                y = Settings.position_y;
+                Vector2 fpsPos = Settings.FpsWidgetPosition;
+                x = fpsPos.x;
+                y = fpsPos.y;
             }
             if (Settings.pluginToggle.GetKeyDown())
             {
@@ -152,9 +153,7 @@ namespace ShowFPS
                 {
                     if (drag)
                     {
-                        Settings.position_x = x;
-                        Settings.position_y = y;
-
+                        Settings.UpdateFpsWidgetPosition(x, y);
                         Settings.SaveConfig();
 
                         drag = false;
