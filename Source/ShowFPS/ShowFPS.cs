@@ -1,35 +1,34 @@
-//  ShowFPS.cs
-//
-//  Author:
-//       Elián Hanisch <lambdae2@gmail.com>
-//
-//  Copyright (c) 2013-2016 Elián Hanisch
-//
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU Lesser General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU Lesser General Public License for more details.
-//
-//  You should have received a copy of the GNU Lesser General Public License
-//  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+/*
+	This file is part of ShowFPS /L Unleashed
+		© 2024 Lisias T : http://lisias.net <support@lisias.net>
+		© 2018-2023 LinuxGuruGamer
+		© 2016-2017 Elián Hanisch <lambdae2@gmail.com>
+
+	ShowFPS /L Unleashed is licensed as follows:
+		* LGPL 3.0 : https://www.gnu.org/licenses/lgpl-3.0.txt
+
+	ShowFPS /L Unleashed is distributed in the hope that it will be useful, but
+	WITHOUT ANY WARRANTY; without even the implied warranty ofMERCHANTABILITY
+	or FITNESS FOR A PARTICULAR PURPOSE.
+
+	You should have received a copy of the GNU Lesser General Public License 3.0
+	along with ShowFPS /L Unleashed . If not, see <https://www.gnu.org/licenses/>.
+
+*/
 
 using System;
-using System.IO;
 using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
+
+using GUI = KSPe.UI.GUI;
+using GUILayout = KSPe.UI.GUILayout;
 
 namespace ShowFPS
 {
-    [KSPAddon(KSPAddon.Startup.MainMenu, true)]
+    [KSPAddon(KSPAddon.Startup.Instantly, true)]
     public class ShowFPS : MonoBehaviour
     {
-        static FPSCounter instance;
+        internal static FPSCounter instance;
 
         void Awake()
         {
@@ -47,40 +46,40 @@ namespace ShowFPS
             {
                 Settings.SaveConfig();
             }
+            instance = null;
         }
     }
 
     /* Code adapted from the example in http://wiki.unity3d.com/index.php?title=FramesPerSecond 
      * written by Annop "Nargus" Prapasapong. */
-    [RequireComponent(typeof(Text))]
+    [RequireComponent(typeof(GUIText))]
     public class FPSCounter : MonoBehaviour
     {
         new bool enabled = false;
-        internal static float frequency = 0.5f;
 
         float curFPS;
 
 
         bool drag;
 
-        Text guiText;
+        GUIText guiText;
 
         void Awake()
         {
             StartCoroutine(FPS());
-            guiText = gameObject.GetComponent<Text>();
+            guiText = gameObject.GetComponent<GUIText>();
             guiText.enabled = false;
         }
 
         void OnMouseDown()
         {
-            //Debug.Log("[ShowFPS: OnMouseDown");
+            Log.dbg("[ShowFPS: OnMouseDown");
             drag = true;
         }
 
         void OnMouseUp()
         {
-            //Debug.Log("[ShowFPS: OnMouseUp");
+            Log.dbg("[ShowFPS: OnMouseUp");
             drag = false;
 
             Settings.position_x = x;
@@ -89,15 +88,15 @@ namespace ShowFPS
         }
 
         float x, y;
-#if false
+#if DEBUG
         int cnt = 0;
 #endif
         void Update()
         {
-#if fasle
+#if DEBUG
             if (cnt++ == 100)
             {
-                Debug.Log("[ShowFPS]: x, y: " +  Settings.position_x + ", " + Settings.position_y);
+                Log.dbg("[ShowFPS]: x, y: {0}, {1}", Settings.position_x, Settings.position_y);
                 cnt = 0;
             }
 #endif
@@ -105,7 +104,7 @@ namespace ShowFPS
             {
                 x = Input.mousePosition.x ;
                 y = (Screen.height - Input.mousePosition.y);
-                //Debug.Log("ShowFPS.update, mouse x, y: " + x + ", " + y);
+                Log.dbg("ShowFPS.update, mouse x, y: {0}, {1}", x, y);
                 guiText.transform.position = new Vector3(x , 0f);
             }
             else
@@ -113,7 +112,7 @@ namespace ShowFPS
                 x = Settings.position_x;
                 y = Settings.position_y;
             }
-            if (PluginKeys.PLUGIN_TOGGLE.GetKeyDown())
+            if (Settings.pluginToggle.GetKeyDown())
             {
 #if true
                 if (Input.GetKey(KeyCode.LeftControl)
@@ -129,7 +128,7 @@ namespace ShowFPS
                     enabled = !enabled;
                     guiText.enabled = enabled;
 
-                    guiText.useGUILayout = false;
+                    //guiText.useGUILayout = false; Works only on KSP >= 1.5
                 }
 #endif
             }
@@ -205,46 +204,36 @@ namespace ShowFPS
 
         IEnumerator FPS()
         {
+            for (; null == Graph.instance; )
+                yield return new WaitForSeconds(Settings.frequency);
+
             for (; ; )
             {
                 if (!enabled) // double the wait if not enabled
                 {
-                    yield return new WaitForSeconds(frequency);
+                    yield return new WaitForSeconds(Settings.frequency);
                 }
 
                 // Capture frame-per-second
                 int lastFrameCount = Time.frameCount;
                 float lastTime = Time.realtimeSinceStartup;
-                yield return new WaitForSeconds(frequency);
+                yield return new WaitForSeconds(Settings.frequency);
 
                 float timeSpan = Time.realtimeSinceStartup - lastTime;
                 int frameCount = Time.frameCount - lastFrameCount;
 
                 // Display it
                 curFPS = frameCount / timeSpan;
-                var symRate = Math.Min(Time.maximumDeltaTime / Time.deltaTime, 1f);
-
-                //var symRate = frameCount / (timeSpan / Planetarium.fetch.fixedDeltaTime) ;
-                //Debug.Log("curFPS: " + curFPS.ToString("F2") + ", frameCount: " + frameCount + ",  timeSpan: " + timeSpan +
-                //    ", deltaTime: " + Time.deltaTime + ", maximumDeltaTime: " + Time.maximumDeltaTime + ", symRate: " + symRate + ", 1/symrate: " + (1 / symRate).ToString());
+                double symRate = Math.Min(Time.maximumDeltaTime / Time.deltaTime, 1f);
+#if DEBUG
+                //double symRate = frameCount / (timeSpan / Planetarium.fetch.fixedDeltaTime) ;
+                Log.dbg(
+                        "curFPS: {0:0.00}, frameCount: {1},  timeSpan: {2}, deltaTime: {3}, maximumDeltaTime: {4}, symRate: {5}, 1/symrate: {6}",
+                        curFPS, frameCount, timeSpan, Time.deltaTime, Time.maximumDeltaTime, symRate, (1 / symRate)
+                    );
+#endif
                 Graph.instance.AddFPSValue(curFPS, (float)symRate);
             }
-        }
-    }
-
-
-    public static class PluginKeys
-    {
-        public static KeyBinding PLUGIN_TOGGLE = new KeyBinding(KeyCode.F8);
-
-        public static void Setup()
-        {
-            PLUGIN_TOGGLE = new KeyBinding(Parse(Settings.GetValue("plugin_key", PLUGIN_TOGGLE.primary.ToString())));
-        }
-
-        public static KeyCode Parse(string value)
-        {
-            return (KeyCode)Enum.Parse(typeof(KeyCode), value);
         }
     }
 }

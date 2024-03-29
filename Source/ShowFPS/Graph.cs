@@ -1,4 +1,21 @@
 ﻿/*
+	This file is part of ShowFPS /L Unleashed
+		© 2024 Lisias T : http://lisias.net <support@lisias.net>
+		© 2018-2023 LinuxGuruGamer
+		© 2016-2017 Elián Hanisch <lambdae2@gmail.com>
+
+	ShowFPS /L Unleashed is licensed as follows:
+		* LGPL 3.0 : https://www.gnu.org/licenses/lgpl-3.0.txt
+
+	ShowFPS /L Unleashed is distributed in the hope that it will be useful, but
+	WITHOUT ANY WARRANTY; without even the implied warranty ofMERCHANTABILITY
+	or FITNESS FOR A PARTICULAR PURPOSE.
+
+	You should have received a copy of the GNU Lesser General Public License 3.0
+	along with ShowFPS /L Unleashed . If not, see <https://www.gnu.org/licenses/>.
+
+*/
+/*
  Copyright (c) 2016 Gerry Iles (Padishar)
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,21 +38,18 @@
 */
 
 using System;
-using System.Text;
 using UnityEngine;
-using KSP.UI.Screens;
-using ToolbarControl_NS;
-using ClickThroughFix;
+
+using GUI = KSPe.UI.GUI;
+using GUILayout = KSPe.UI.GUILayout;
 
 
 namespace ShowFPS
 {
-    [KSPAddon(KSPAddon.Startup.Instantly, false)]
+    [KSPAddon(KSPAddon.Startup.MainMenu, true)]
     public class Graph : MonoBehaviour
     {
-        public static Graph instance;
-
-        const String testFilename = "test.cfg";
+        internal static Graph instance;
 
         const int GraphX = 10;
         const int GraphY = 36;
@@ -46,14 +60,12 @@ namespace ShowFPS
         int WndWidth = Settings.GRAPHWIDTH + 8;
         int WndHeight = Settings.GRAPHHEIGHT + 42;
 
-        int numScales = 15;   // Number of entries in the scale array
-
         Rect windowPos;
         Rect windowDragRect;
         Rect helpWinPos;
         int windowId = 0;
         string windowTitle;
-        bool showUI = true;
+        bool showUI = false;
         bool showHelp = false;
         Rect labelRect;
         Rect graphRect;
@@ -74,14 +86,9 @@ namespace ShowFPS
 
         bool fullUpdate = true;     // Flag to force re-render of entire texture (e.g. when changing scale)
 
-        bool startVisible = false;
-
-        internal KeyCode keyToggleWindow;
-        internal KeyCode keyScaleUp;
-        internal KeyCode keyScaleDown;
-
         int scaleIndex = 4;         // Index of the current vertical scale
-        static float[] valCycle;
+        static readonly float[] valCycle = new float[] { 5, 10, 15, 30, 40, 50, 60, 70, 80, 90, 100, 120, 150, 200 };
+        static readonly int numScales = valCycle.Length;
 
 
         Color[] blackLine;
@@ -91,7 +98,7 @@ namespace ShowFPS
         Color[] blueLine;
         Color[] greyLine;
 
-        static internal GUIStyle labelStyle;
+        static internal GUIStyle labelStyle = null;
 
         private ResizeHandle resizeHandle;
 
@@ -103,36 +110,8 @@ namespace ShowFPS
         float curFPS;
         const float SYM_MULT = 0.5f;
 
-
-        public static bool IsOpen()
+        private void InitGui()
         {
-            return instance != null ? instance.showUI : false;
-        }
-
-        ToolbarControl toolbarControl = null;
-
-        internal const string MODID = "ShowFPS_NS";
-        internal const string MODNAME = "ShowFPS";
-        internal void InitToolbar()
-        {
-            if (toolbarControl == null)
-            {
-                toolbarControl = gameObject.AddComponent<ToolbarControl>();
-                toolbarControl.AddToAllToolbars(Toggle, Toggle,
-                    ApplicationLauncher.AppScenes.SPACECENTER |
-                    ApplicationLauncher.AppScenes.FLIGHT |
-                    ApplicationLauncher.AppScenes.MAPVIEW |
-                    ApplicationLauncher.AppScenes.VAB |
-                    ApplicationLauncher.AppScenes.SPH |
-                    ApplicationLauncher.AppScenes.TRACKSTATION,
-                    MODID,
-                    "ShowFPSButton",
-                    "ShowFPS/PluginData/fps-38",
-                    "ShowFPS/PluginData/fps-24",
-                    MODNAME
-                );
-            }
-
             labelStyle = new GUIStyle(GUI.skin.label);
 
             // resize button
@@ -168,15 +147,11 @@ namespace ShowFPS
 
 
 
-        internal void InitGraphWindow()
+        private void InitGraphWindow()
         {
             LabelWidth = Settings.GraphWidth;
             WndWidth = Settings.GraphWidth + 8;
             WndHeight = Settings.GraphHeight + 42;
-
-            keyToggleWindow = Settings.keyToggleWindow;
-            keyScaleUp = Settings.keyScaleUp;
-            keyScaleDown = Settings.keyScaleDown;
 
             windowPos.Set(Settings.winX, Settings.winY, WndWidth, WndHeight);
             windowDragRect.Set(0, 0, WndWidth, WndHeight);
@@ -194,7 +169,7 @@ namespace ShowFPS
             for (int i = 0; i < blackLine.Length; i++)
             {
                 blackLine[i] = Color.black;
-                blackLine[i].a = Alpha;
+                blackLine[i].a = Settings.alpha;
 
                 yellowLine[i] = Color.yellow;
                 redLine[i] = Color.red;
@@ -211,21 +186,18 @@ namespace ShowFPS
             RedrawGraph();
         }
 
-        void Toggle()
+        internal void Toggle(bool newValue)
         {
-            showUI = !showUI;
-            if (!showUI)
+			this.showUI = newValue;
+
+            if (this.showUI)
             {
-                showHelp = false;
-                SaveWinSettings();
+                this.InitGraphWindow();
             }
             else
             {
-                showPerfectSym = Settings.showPerfectSym;
-                periodicRescale = Settings.periodicRescale;
-                Alpha = Settings.alpha;
-                FPSCounter.frequency = Settings.frequency;
-                instance.InitGraphWindow();
+                this.showHelp = false;
+                SaveWinSettings();
             }
         }
 
@@ -234,26 +206,27 @@ namespace ShowFPS
             DontDestroyOnLoad(this);
 
             instance = this;
+
             windowId = Guid.NewGuid().GetHashCode();
             windowTitle = "Show FPS";
 
-            valCycle = new float[] { 5, 10, 15, 30, 40, 50, 60, 70, 80, 90, 100, 120, 150, 200 };
-            numScales = valCycle.Length;
-
             helpWinPos.Set(40, 40, 500, 100);
 
-            showUI = startVisible;
+            showUI = Settings.startVisible;
 
             // Force a full update of the graph texture
             fullUpdate = true;
 
             fpsValues = new float[Screen.width, 3];
             Array.Clear(fpsValues, 0, Settings.GraphWidth * 3);
+
+            this.InitGraphWindow();
         }
 
 
         void Start()
         {
+            ToolbarController.Instance.Create(this);
             areaStyle = new GUIStyle(HighLogic.Skin.textArea);
             areaStyle.richText = true;
         }
@@ -288,19 +261,17 @@ namespace ShowFPS
         {
             if (GameSettings.MODIFIER_KEY.GetKey())
             {
-                if (Input.GetKeyDown(keyToggleWindow))
+                if (Input.GetKeyDown(Settings.keyToggleWindow))
                 {
-                    showUI = !showUI;
-                    if (!showUI)
-                        showHelp = false;
+					ToolbarController.Instance.Toggle();
                 }
-                if (Input.GetKeyDown(keyScaleUp))
+                if (this.showUI && Input.GetKeyDown(Settings.keyScaleUp))
                 {
                     // Increase scale
                     scaleIndex = (scaleIndex + 1) % numScales;
                     fullUpdate = true;
                 }
-                if (Input.GetKeyDown(keyScaleDown))
+                if (this.showUI && Input.GetKeyDown(Settings.keyScaleDown))
                 {
                     // Decrease scale
                     scaleIndex = (scaleIndex + numScales - 1) % numScales;
@@ -361,7 +332,7 @@ namespace ShowFPS
                 DrawLine(texGraph, x, (int)((double)fpsValues[x, FPS] * heightAdj), greenLine, blackLine);
             if (fpsValues[x, FPS_AVG] > 0)
                 DrawLine(texGraph, x, (int)((double)fpsValues[x, FPS_AVG] * heightAdj), yellowLine, null);
-            if (showPerfectSym)
+            if (Settings.showPerfectSym)
                 DrawLine(texGraph, x, (int)((double)SYM_MULT * Settings.GraphHeight), greyLine, null);
             if (fpsValues[x, SYMRATE] > 0)
                 DrawLine(texGraph, x, (int)((double)fpsValues[x, SYMRATE] * Settings.GraphHeight), redLine, null);
@@ -402,18 +373,17 @@ namespace ShowFPS
             {
                 if (showUI)
                 {
-                    windowPos = ClickThruBlocker.GUILayoutWindow(windowId, windowPos, WindowGUI, windowTitle);
+                    if (null == labelStyle) this.InitGui();
+                    windowPos = GUILayout.Window(windowId, windowPos, WindowGUI, windowTitle);
                     // do this here since if it's done within the window you only recieve events that are inside of the window
                     this.resizeHandle.DoResize(ref this.windowPos);
                 }
 
                 if (showHelp)
-                    helpWinPos = ClickThruBlocker.GUILayoutWindow(windowId + 1, helpWinPos, helpWin, "ShowFPS Help");
+                    helpWinPos = GUILayout.Window(windowId + 1, helpWinPos, helpWin, "ShowFPS Help");
             }
         }
 
-        bool showPerfectSym = false;
-        bool periodicRescale = false;
         double lastRescaleTime = 0;
 
         void WindowGUI(int windowID)
@@ -428,16 +398,16 @@ namespace ShowFPS
             GUILayout.Label(guiStr); //, labelStyle);
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("Refresh"))
-                instance.InitGraphWindow();
+                this.InitGraphWindow();
             GUILayout.Space(10);
             if (GUILayout.Button("Clear"))
             {
                 Array.Clear(fpsValues, 0, Settings.GraphWidth * 3);
                 valIndex = lastRendered = 0;
-                instance.InitGraphWindow();
+                this.InitGraphWindow();
             }
             GUILayout.Space(10);
-            if (GUILayout.Button("Rescale", GUILayout.Width(70)) || (periodicRescale && Planetarium.fetch.time - lastRescaleTime >= 60f))
+            if (GUILayout.Button("Rescale", GUILayout.Width(70)) || (Settings.periodicRescale && Planetarium.fetch.time - lastRescaleTime >= 60f))
             {
                 float maxHeight = 5;
                 int oldScaleIndex = scaleIndex;
@@ -455,12 +425,9 @@ namespace ShowFPS
             }
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal();
-            var oShowPerfectSym = showPerfectSym;
-            var oPeriodicRescale = periodicRescale;
-
-            showPerfectSym = GUILayout.Toggle(showPerfectSym, "Show Max Symrate");
+			bool oShowPerfectSym = GUILayout.Toggle(Settings.showPerfectSym, "Show Max Symrate");
             GUILayout.FlexibleSpace();
-            periodicRescale = GUILayout.Toggle(periodicRescale, "Periodic auto-rescale");
+			bool oPeriodicRescale = GUILayout.Toggle(Settings.periodicRescale, "Periodic auto-rescale");
             GUILayout.EndHorizontal();
             if (!resizeHandle.resizing)
             {
@@ -498,46 +465,43 @@ namespace ShowFPS
             }
             GUILayout.BeginHorizontal();
             GUILayout.Label("Transparency:", GUILayout.Width(130));
-            var oAlpha = Alpha;
-            Alpha = GUILayout.HorizontalSlider(Alpha, 0.1f, 1f, GUILayout.Width(130));
-            if (oAlpha != Alpha)
+			float oAlpha = GUILayout.HorizontalSlider(Settings.alpha, 0.1f, 1f, GUILayout.Width(130));
+            if (oAlpha != Settings.alpha)
             {
                 blackLine = new Color[Settings.GraphHeight];
                 for (int i = 0; i < blackLine.Length; i++)
-                    blackLine[i].a = Alpha;
+                    blackLine[i].a = oAlpha;
             }
 
             GUILayout.FlexibleSpace();
-            GUILayout.Label("Frequency (" + FPSCounter.frequency.ToString("F2") + "s):", GUILayout.Width(130));
-            var oFreq = FPSCounter.frequency;
-            FPSCounter.frequency = GUILayout.HorizontalSlider(FPSCounter.frequency, 0.25f, 1f, GUILayout.Width(130));
+            GUILayout.Label("Frequency (" + Settings.frequency.ToString("F2") + "s):", GUILayout.Width(130));
+			float oFreq = GUILayout.HorizontalSlider(Settings.frequency, 0.25f, 1f, GUILayout.Width(130));
 
             GUILayout.EndHorizontal();
 
             this.resizeHandle.Draw(ref this.windowPos);
 
             GUI.DragWindow(windowDragRect);
-            if (oShowPerfectSym != showPerfectSym ||
-                oPeriodicRescale != periodicRescale ||
-                oAlpha != Alpha ||
-                oFreq != FPSCounter.frequency)
+            if (oShowPerfectSym != Settings.showPerfectSym ||
+                oPeriodicRescale != Settings.periodicRescale ||
+                oAlpha != Settings.alpha ||
+                oFreq != Settings.frequency)
             {
+                Settings.showPerfectSym = oShowPerfectSym;
+                Settings.periodicRescale = oPeriodicRescale;
+                Settings.alpha = oAlpha;
+                Settings.frequency = oFreq;
                 SaveWinSettings();
             }
         }
 
         void SaveWinSettings()
         {
-                Settings.showPerfectSym = showPerfectSym;
-                Settings.periodicRescale = periodicRescale;
-                Settings.alpha = Alpha;
-                Settings.frequency = FPSCounter.frequency;
-                Settings.winX = windowPos.x;
-                Settings.winY = windowPos.y;
-                Settings.SaveConfig();
+			Settings.winX = windowPos.x;
+			Settings.winY = windowPos.y;
+			Settings.SaveConfig();
         }
 
-        float Alpha = 1;
         static GUIStyle areaStyle;
 
         const string helpText1 =
