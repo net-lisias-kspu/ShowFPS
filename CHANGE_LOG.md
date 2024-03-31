@@ -1,5 +1,7 @@
 # ShowFPS /L Unleashed :: Change Log
 
+* 2022-1207: 0.3.1.3 (LinuxGuruGamer) for KSP 1.12.5
+	+ Some minor code cleanup
 * 2022-1118: 0.3.1.2 (LinuxGuruGamer) for KSP 1.12.4
 	+ Changed default position to 50, 50 (upper left corner)
 	+ Added code to save config when leaving drag mode
