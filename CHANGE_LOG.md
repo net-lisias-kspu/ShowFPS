@@ -1,5 +1,9 @@
 # ShowFPS /L Unleashed :: Change Log
 
+* 2020-0723: 0.2.3 (LinuxGuruGamer) for KSP 1.10.0
+	+ FPS > 60 now get rounded to nearest integer
+	+ FPS<= 60 get rounded to nearest 2 decimal places
+	+ Removed log spam
 * 2020-0226: 0.2.2.1 (LinuxGuruGamer) for KSP 1.9.0
 	+ Added placeholder in PluginData
 * 2020-0226: 0.2.2 (LinuxGuruGamer) for KSP 1.9.0
