@@ -1,5 +1,8 @@
 # ShowFPS /L Unleashed :: Change Log
 
+* 2020-0226: 0.2.2 (LinuxGuruGamer) for KSP 1.9.0
+	+ Fixed dragging of numbers to anywhere
+	+ Added font size to config file
 * 2020-0222: 0.2.1.1 (LinuxGuruGamer) for KSP 1.9.0
 * 2019-1101: 0.2.1 (LinuxGuruGamer) for KSP 1.8.1
 	+ Added InstallChecker
