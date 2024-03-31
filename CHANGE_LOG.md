@@ -1,5 +1,7 @@
 # ShowFPS /L Unleashed :: Change Log
 
+* 2021-1024: 0.3.1 (LinuxGuruGamer) for KSP 1.12.2
+	+ Restored the F8 functionality to show the FPS on screen
 * 2021-0926: 0.3.0.2 (LinuxGuruGamer) for KSP 1.12.2
 	+ Added AssemblyFileVersion
 * 2021-0924: 0.3.0.1 (LinuxGuruGamer) for KSP 1.12.2
