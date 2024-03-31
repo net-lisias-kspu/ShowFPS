@@ -34,12 +34,24 @@
 	+ Fixed dragging of numbers to anywhere
 	+ Added font size to config file
 * 2020-0222: 0.2.1.1 (LinuxGuruGamer) for KSP 1.9.0
+	+ No changelog provided 
 * 2019-1101: 0.2.1 (LinuxGuruGamer) for KSP 1.8.1
 	+ Added InstallChecker
 	+ Updated AssemblyVersion
 	+ Updated for KSP 1.8
 * 2019-0109: 0.2.0.3 (LinuxGuruGamer) for KSP 1.6.0
+	+ No changelog provided 
 * 2018-1102: 0.2.0.2 (LinuxGuruGamer) for KSP 1.5.1
 	+ Version bump for 1.5 rebuild
 * 2018-0517: 0.2.0.1 (LinuxGuruGamer) for KSP 1.4.3
+	+ No changelog provided 
 * 2018-0320: 0.2.0 (LinuxGuruGamer) for KSP 1.4.1
+	+ Initial adoption
+* 2016-05??: 1.1 (Elián Hanisch <lambdae2@gmail.com>) for KSP 1.1
+	+ Updated for KSP 1.1
+* ????-????: 1.0 (Elián Hanisch <lambdae2@gmail.com>) for KSP < 1.1
+	+ change the default toggle key from F11 to F8.
+	+ make FPS counter dragable.
+	+ make the the enable/disable shortcut configurable.
+* ????-????: 2.2 (Elián Hanisch <lambdae2@gmail.com>) for KSP < 1.1
+	+ Initial release.
