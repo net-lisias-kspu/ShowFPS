@@ -1,5 +1,8 @@
 # ShowFPS /L Unleashed :: Change Log
 
+* 2021-0126: 0.2.4 (LinuxGuruGamer) for KSP 1.11.0
+	+ Fixed display of benchmarks
+	+ Cleaned up unnecessary code
 * 2020-0723: 0.2.3 (LinuxGuruGamer) for KSP 1.10.0
 	+ FPS > 60 now get rounded to nearest integer
 	+ FPS<= 60 get rounded to nearest 2 decimal places
