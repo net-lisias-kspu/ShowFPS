@@ -1,5 +1,11 @@
 # ShowFPS /L Unleashed :: Change Log
 
+* 2022-1118: 0.3.1.2 (LinuxGuruGamer) for KSP 1.12.4
+	+ Changed default position to 50, 50 (upper left corner)
+	+ Added code to save config when leaving drag mode
+	+ Change fps precision to 1 decimal instead of 2
+	+ Changed size of text box from hard-coded 200 pixels to the actual calculated size of the text for the on-screen
+	+ Fixes #2
 * 2022-1116: 0.3.1.1 (LinuxGuruGamer) for KSP 1.12.4
 	+ Fixed FPS on screen jumping around in the editor when clicking the buttons at the upper-right
 * 2021-1024: 0.3.1 (LinuxGuruGamer) for KSP 1.12.2
