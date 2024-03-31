@@ -1,5 +1,10 @@
 # ShowFPS /L Unleashed :: Change Log
 
+* 2021-0809: 0.3.0 (LinuxGuruGamer) for KSP 1.12.2
+	+ Added FPS graph
+	+ New dependencies
+		- ClickThroughBlocker
+		- ToolbarController
 * 2021-0126: 0.2.4 (LinuxGuruGamer) for KSP 1.11.0
 	+ Fixed display of benchmarks
 	+ Cleaned up unnecessary code
