@@ -1,5 +1,7 @@
 # ShowFPS /L Unleashed :: Change Log
 
+* 2022-1116: 0.3.1.1 (LinuxGuruGamer) for KSP 1.12.4
+	+ Fixed FPS on screen jumping around in the editor when clicking the buttons at the upper-right
 * 2021-1024: 0.3.1 (LinuxGuruGamer) for KSP 1.12.2
 	+ Restored the F8 functionality to show the FPS on screen
 * 2021-0926: 0.3.0.2 (LinuxGuruGamer) for KSP 1.12.2
