@@ -1,5 +1,7 @@
 # ShowFPS /L Unleashed :: Change Log
 
+* 2021-0926: 0.3.0.2 (LinuxGuruGamer) for KSP 1.12.2
+	+ Added AssemblyFileVersion
 * 2021-0924: 0.3.0.1 (LinuxGuruGamer) for KSP 1.12.2
 	+ Added hiding of ui when F2 is pressed
 * 2021-0809: 0.3.0 (LinuxGuruGamer) for KSP 1.12.2
