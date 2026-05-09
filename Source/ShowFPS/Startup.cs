@@ -1,6 +1,6 @@
 ﻿/*
 	This file is part of ShowFPS /L Unleashed
-		© 2024 Lisias T : http://lisias.net <support@lisias.net>
+		© 2024-2026 LisiasT : http://lisias.net <support@lisias.net>
 		© 2018-2023 LinuxGuruGamer
 		© 2016-2017 Elián Hanisch <lambdae2@gmail.com>
 

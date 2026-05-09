@@ -1,6 +1,6 @@
 ﻿/*
 	This file is part of Atmosphere ShowFPS /L Unleashed
-			© 2024 Lisias T : http://lisias.net <support@lisias.net>
+			© 2024-2026 LisiasT : http://lisias.net <support@lisias.net>
 
 	THIS FILE is licensed to you under:
 
