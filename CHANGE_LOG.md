@@ -1,5 +1,7 @@
 # ShowFPS /L Unleashed :: Change Log
 
+* 2026-0509: 0.3.1.5 (LisiasT) for KSP >= 1.3.1
+	+ Respecting the `<F2>` "Hide GUI" feature, omitting the FPS Counter from the view accordingly.
 * 2024-0331: 0.3.1.4 (LisiasT) for KSP >= 1.3.1
 	+ Using KSPe facilities
 		- Logging
