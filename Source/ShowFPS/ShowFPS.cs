@@ -69,9 +69,18 @@ namespace ShowFPS
             StartCoroutine(FPS());
             guiText = gameObject.GetComponent<GUIText>();
             guiText.enabled = false;
+
+			GameEvents.onShowUI.Add(this.OnShowUI);
+			GameEvents.onHideUI.Add(this.OnHideUI);
         }
 
-        void OnMouseDown()
+		void OnDestroy()
+		{
+			GameEvents.onHideUI.Remove(this.OnHideUI);
+			GameEvents.onShowUI.Remove(this.OnShowUI);
+		}
+
+		void OnMouseDown()
         {
             Log.dbg("[ShowFPS: OnMouseDown");
             drag = true;
@@ -173,6 +182,10 @@ namespace ShowFPS
             style.normal.textColor = backup;
         }
 
+		private bool isUiHidden = false;
+		private void OnHideUI() => this.isUiHidden = true;
+		private void OnShowUI() => this.isUiHidden = false;
+
         private const int LEFT = 10;
         private const int TOP = 20;
         private const int WIDTH = 50;
@@ -182,6 +195,7 @@ namespace ShowFPS
         GUIStyle timeLabelStyle = null;
         public void OnGUI()
         {
+            if (this.isUiHidden) return;
             if (enabled)
             {
                 if (timeLabelStyle == null)
